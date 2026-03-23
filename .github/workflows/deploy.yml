@@ -11,9 +11,9 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Deploy to EC2 via SSH
+    - name: Deploy to EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -21,11 +21,6 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           sudo rm -rf /var/www/html/*
-          mkdir -p /tmp/site
-
-          # Copy files from GitHub repo to EC2
           git clone https://github.com/Nareshnkn/git-jenkins-aws.git /tmp/site
-
           sudo cp -r /tmp/site/* /var/www/html/
-
           sudo systemctl restart nginx
