@@ -13,14 +13,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Create SSH key
+      run: |
+        echo "${{ secrets.EC2_KEY }}" > key.pem
+        chmod 600 key.pem
+
     - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
           sudo rm -rf /var/www/html/*
           git clone https://github.com/Nareshnkn/git-jenkins-aws.git /tmp/site
           sudo cp -r /tmp/site/* /var/www/html/
           sudo systemctl restart nginx
+        EOF
