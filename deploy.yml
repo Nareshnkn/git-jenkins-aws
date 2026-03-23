@@ -1,0 +1,31 @@
+name: Deploy Static Website to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          sudo rm -rf /var/www/html/*
+          mkdir -p /tmp/site
+
+          # Copy files from GitHub repo to EC2
+          git clone https://github.com/Nareshnkn/git-jenkins-aws.git /tmp/site
+
+          sudo cp -r /tmp/site/* /var/www/html/
+
+          sudo systemctl restart nginx
